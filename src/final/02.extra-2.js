@@ -11,7 +11,7 @@ import {
   PokemonErrorBoundary,
 } from '../pokemon'
 
-function asyncReducer(state, action) {
+function asyncReducer(_, action) {
   switch (action.type) {
     case 'pending': {
       return {status: 'pending', data: null, error: null}

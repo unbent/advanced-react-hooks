@@ -37,7 +37,7 @@ function PokemonInfo({pokemonName}) {
 
   // -------------------------- start --------------------------
 
-  function useAsync(asyncCallback, initialState) {
+  function useAsync(initialState) {
     const [state, dispatch] = React.useReducer(asyncReducer, {
       status: 'idle',
       data: null,
@@ -45,11 +45,9 @@ function PokemonInfo({pokemonName}) {
       ...initialState,
     })
 
-    React.useEffect(() => {
-      const promise = asyncCallback();
-      if (!promise) {
-        return
-      }
+    const {data, error, status} = state
+
+    const run = React.useCallback(promise => {
       dispatch({type: 'pending'})
       promise.then(
         data => {
@@ -59,10 +57,10 @@ function PokemonInfo({pokemonName}) {
           dispatch({type: 'rejected', error})
         },
       )
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [asyncCallback])
 
-    return state;
+    }, [])
+
+    return {error, status, data, run}
   }
 
   // --------------------------- end ---------------------------
@@ -70,16 +68,33 @@ function PokemonInfo({pokemonName}) {
   // 🐨 here's how you'll use the new useAsync hook you're writing:
 
 
-  const state = useAsync(
-    React.useCallback(() => {
-      if (!pokemonName) {
-        return
-      }
-      return fetchPokemon(pokemonName)
-    }, [pokemonName]
-  ), {status: pokemonName ? 'pending' : 'idle'})
-  // 🐨 this will change from "pokemon" to "data"
-  const {data: pokemon, status, error} = state
+
+  // const asyncCallback = React.useCallback(() => {
+  //   if (!pokemonName) {
+  //     return
+  //   }
+  //   return fetchPokemon(pokemonName)
+  // }, [pokemonName]);
+
+  // const state = useAsync(asyncCallback, {
+  //   status: pokemonName ? 'pending' : 'idle',
+  // });
+
+  const {
+    data: pokemon,
+    status,
+    error,
+    run,
+  } = useAsync({status: pokemonName ? 'pending' : 'idle'})
+
+  React.useEffect(() => {
+    if (!pokemonName) {
+      return
+    }
+
+    const pokemonPromise = fetchPokemon(pokemonName)
+    run(pokemonPromise)
+  }, [pokemonName, run])
 
   switch (status) {
     case 'idle':
