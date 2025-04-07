@@ -5,7 +5,7 @@ import * as React from 'react'
 
 function useMedia(query, initialState = false) {
   const [state, setState] = React.useState(initialState)
-  React.useDebugValue(`\`${query}\` => ${state}`);
+  React.useDebugValue({query, state}, `Window Size: ${query}; State: ${state}`);
 
   React.useEffect(() => {
     let mounted = true
